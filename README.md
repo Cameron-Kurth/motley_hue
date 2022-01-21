@@ -1,4 +1,4 @@
-# ![Mötley Hüe](./assets/color-wheel.png) Mötley Hüe
+# ![](./assets/color-wheel.png) Mötley Hüe
 
 Mötley Hüe is a small library built on top of [Chameleon](https://hexdocs.pm/chameleon/readme.html) for calculating color combinations.
 All color conversion is delegated to Chameleon while Mötley Hüe simply handles the math to determine the following combinations for a given color:
