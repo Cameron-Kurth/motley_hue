@@ -21,7 +21,7 @@ by adding `motley_hue` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:motley_hue, "~> 0.2.0"}
+    {:motley_hue, "~> 0.2"}
   ]
 end
 ```
