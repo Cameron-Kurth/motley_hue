@@ -1,4 +1,8 @@
-# ![](./assets/color-wheel.png) Mötley Hüe
+# Mötley Hüe ![](./assets/color-wheel.png)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Hex version badge](https://img.shields.io/hexpm/v/motley_hue.svg)](https://hex.pm/packages/motley_hue)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/motley_hue/)
 
 Mötley Hüe is a small library built on top of [Chameleon](https://hexdocs.pm/chameleon/readme.html) for calculating color combinations.
 All color conversion is delegated to Chameleon while Mötley Hüe simply handles the math to determine the following combinations for a given color:
@@ -17,7 +21,7 @@ by adding `motley_hue` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:motley_hue, "~> 0.1.0"}
+    {:motley_hue, "~> 0.2.0"}
   ]
 end
 ```
