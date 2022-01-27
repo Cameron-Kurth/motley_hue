@@ -26,13 +26,22 @@ defmodule MotleyHueTest do
     assert MotleyHue.complimentary(rgb, :rgb) == [rgb, %Chameleon.RGB{r: 255, g: 127, b: 127}]
   end
 
+  test "even" do
+    hsv = Chameleon.HSV.new(0, 100, 100)
+    even_combination = MotleyHue.even(hsv, 5)
+
+    assert even_combination |> Enum.map(& &1.h) == [0, 72, 144, 216, 288]
+    assert even_combination |> Enum.map(& &1.s) == [100, 100, 100, 100, 100]
+    assert even_combination |> Enum.map(& &1.v) == [100, 100, 100, 100, 100]
+  end
+
   test "monochromatic" do
     hsv = Chameleon.HSV.new(0, 100, 100)
     monochromatic_combination = MotleyHue.monochromatic(hsv, 4)
 
-    assert monochromatic_combination |> Enum.map(& &1.h) == [0, 0, 0, 0, 0]
-    assert monochromatic_combination |> Enum.map(& &1.s) == [100, 100, 100, 100, 100]
-    assert monochromatic_combination |> Enum.map(& &1.v) == [100, 75, 50, 25, 0]
+    assert monochromatic_combination |> Enum.map(& &1.h) == [0, 0, 0, 0]
+    assert monochromatic_combination |> Enum.map(& &1.s) == [100, 100, 100, 100]
+    assert monochromatic_combination |> Enum.map(& &1.v) == [100, 75, 50, 25]
   end
 
   test "tetradic" do

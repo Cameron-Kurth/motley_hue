@@ -108,20 +108,58 @@ defmodule MotleyHue do
   end
 
   @doc """
+  Returns the provided color and the requested count of additional colors evenly spaced along the color wheel.
+
+  ## Examples
+
+      iex> MotleyHue.even("FF0000", 5)
+      ["FF0000", "CCFF00", "00FF66", "0066FF", "CC00FF"]
+
+  """
+  @spec even(binary | map, integer) :: list | {:error, binary}
+  def even(_color, count) when count < 2,
+    do: {:error, "Count must be a positive integer greater than or equal to 2"}
+
+  def even(color, count) when is_integer(count) do
+    base = Chameleon.convert(color, Chameleon.HSV)
+
+    case base do
+      {:error, err} ->
+        {:error, err}
+
+      base ->
+        degree_offset = round(360 / count)
+
+        1..(count - 1)
+        |> Enum.map(fn i ->
+          hue_offset = i * degree_offset
+          hue = rem(base.h + hue_offset, 360)
+          Chameleon.HSV.new(hue, base.s, base.v)
+        end)
+        |> then(&format_response(color, &1))
+    end
+  end
+
+  @doc """
   Returns the provided color and its monochromatic color spectrum towards black.
   The number of results is configurable with each color equally spaced from the previous value.
 
   ## Examples
 
       iex> MotleyHue.monochromatic("FF0000")
-      ["FF0000", "800000", "000000"]
+      ["FF0000", "AB0000", "570000"]
 
       iex> MotleyHue.monochromatic("FF0000", 5)
-      ["FF0000", "CC0000", "990000", "660000", "330000", "000000"]
+      ["FF0000", "CC0000", "990000", "660000", "330000"]
 
   """
   @spec monochromatic(binary | map, integer) :: list | {:error, binary}
-  def monochromatic(color, count \\ 2) when is_integer(count) do
+  def monochromatic(color, count \\ 3)
+
+  def monochromatic(_color, count) when count < 2,
+    do: {:error, "Count must be a positive integer greater than or equal to 2"}
+
+  def monochromatic(color, count) when is_integer(count) do
     base = Chameleon.convert(color, Chameleon.HSV)
 
     case base do
@@ -132,7 +170,7 @@ defmodule MotleyHue do
         step = div(100, count)
 
         Range.new(0, 100, step)
-        |> Enum.drop(1)
+        |> Enum.slice(1..(count - 1))
         |> Enum.map(fn value_offset ->
           value = round(base.v - value_offset)
           Chameleon.HSV.new(base.h, base.s, value)
