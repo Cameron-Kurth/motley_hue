@@ -78,19 +78,7 @@ defmodule MotleyHue do
   def complimentary(color, model \\ :hsv)
 
   def complimentary(color, :hsv) do
-    base = Chameleon.convert(color, Chameleon.HSV)
-
-    case base do
-      {:error, err} ->
-        {:error, err}
-
-      base ->
-        hue_offset = 180
-        hue = rem(base.h + hue_offset, 360)
-        compliment = Chameleon.HSV.new(hue, base.s, base.v)
-
-        format_response(color, [compliment])
-    end
+    even(color, 2)
   end
 
   def complimentary(color, :rgb) do
@@ -190,21 +178,7 @@ defmodule MotleyHue do
   """
   @spec tetradic(binary | map) :: list | {:error, binary}
   def tetradic(color) do
-    base = Chameleon.convert(color, Chameleon.HSV)
-
-    case base do
-      {:error, err} ->
-        {:error, err}
-
-      base ->
-        1..3
-        |> Enum.map(fn i ->
-          hue_offset = i * 90
-          hue = rem(base.h + hue_offset, 360)
-          Chameleon.HSV.new(hue, base.s, base.v)
-        end)
-        |> then(&format_response(color, &1))
-    end
+    even(color, 4)
   end
 
   @doc """
@@ -218,21 +192,7 @@ defmodule MotleyHue do
   """
   @spec triadic(binary | map) :: list | {:error, binary}
   def triadic(color) do
-    base = Chameleon.convert(color, Chameleon.HSV)
-
-    case base do
-      {:error, err} ->
-        {:error, err}
-
-      base ->
-        1..2
-        |> Enum.map(fn i ->
-          hue_offset = i * 120
-          hue = rem(base.h + hue_offset, 360)
-          Chameleon.HSV.new(hue, base.s, base.v)
-        end)
-        |> then(&format_response(color, &1))
-    end
+    even(color, 3)
   end
 
   defp format_response(color, matches) when is_struct(color) do
