@@ -39,15 +39,10 @@ defmodule MotleyHue do
           hue =
             case direction do
               :clockwise ->
-                rem(base.h + hue_offset, 360)
+                calculate_degree(base.h + hue_offset)
 
               :counter_clockwise ->
-                degrees = base.h - hue_offset
-
-                cond do
-                  degrees < 0 -> 360 + degrees
-                  true -> degrees
-                end
+                calculate_degree(base.h - hue_offset)
             end
 
           Chameleon.HSV.new(hue, base.s, base.v)
@@ -130,8 +125,7 @@ defmodule MotleyHue do
           base_offset = i * degree_offset
           rotation_offset = -360 * div + safe_divide(degree_offset, 2 * div)
           hue_offset = round(base_offset + rotation_offset)
-
-          hue = rem(base.h + hue_offset, 360)
+          hue = calculate_degree(base.h + hue_offset)
           Chameleon.HSV.new(hue, base.s, base.v)
         end)
         |> then(&format_response(color, &1))
@@ -164,7 +158,7 @@ defmodule MotleyHue do
         1..(count - 1)
         |> Enum.map(fn i ->
           hue_offset = i * degree_offset
-          hue = rem(base.h + hue_offset, 360)
+          hue = calculate_degree(base.h + hue_offset)
           Chameleon.HSV.new(hue, base.s, base.v)
         end)
         |> then(&format_response(color, &1))
@@ -237,6 +231,9 @@ defmodule MotleyHue do
   def triadic(color) do
     even(color, 3)
   end
+
+  defp calculate_degree(degree) when degree >= 0, do: degree |> round() |> rem(360)
+  defp calculate_degree(degree), do: degree |> round() |> then(&(360 + rem(&1, 360)))
 
   defp format_response(color, matches) when is_struct(color) do
     [color]
