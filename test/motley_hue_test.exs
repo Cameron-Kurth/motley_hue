@@ -26,6 +26,20 @@ defmodule MotleyHueTest do
     assert MotleyHue.complimentary(rgb, :rgb) == [rgb, %Chameleon.RGB{r: 255, g: 127, b: 127}]
   end
 
+  test "contrast" do
+    hsv = Chameleon.HSV.new(0, 100, 100)
+    contrast_combination = MotleyHue.contrast(hsv, 13)
+
+    assert contrast_combination |> Enum.map(& &1.h) ==
+             [0, 60, 120, 180, 240, 300, 30, 90, 150, 210, 270, 330, 15]
+
+    assert contrast_combination |> Enum.map(& &1.s) ==
+             [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
+
+    assert contrast_combination |> Enum.map(& &1.v) ==
+             [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
+  end
+
   test "even" do
     hsv = Chameleon.HSV.new(0, 100, 100)
     even_combination = MotleyHue.even(hsv, 5)

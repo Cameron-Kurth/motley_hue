@@ -96,7 +96,50 @@ defmodule MotleyHue do
   end
 
   @doc """
-  Returns the provided color and the requested count of additional colors evenly spaced along the color wheel.
+  Returns the requested count of colors, including the provided color, distributed along the color wheel.
+  Ideal for use as color palette where adjacent colors need to be easily differentiated with one another (e.g., categorical or other non-quantitative data).
+
+  ## Examples
+
+      iex> MotleyHue.contrast("FF0000", 7)
+      ["FF0000", "FFFF00", "00FF00", "00FFFF", "0000FF", "FF00FF", "FF8000"]
+
+      iex> MotleyHue.contrast("FF0000", 13)
+      ["FF0000", "FFFF00", "00FF00", "00FFFF", "0000FF", "FF00FF", "FF8000", "80FF00", "00FF80", "0080FF", "8000FF", "FF0080", "FF4000"]
+
+  """
+  @spec contrast(binary | map, integer) :: list | {:error, binary}
+  def contrast(_color, count) when count < 2,
+    do: {:error, "Count must be a positive integer greater than or equal to 2"}
+
+  def contrast(color, count) when count <= 6, do: even(color, count)
+
+  def contrast(color, count) when is_integer(count) do
+    base = Chameleon.convert(color, Chameleon.HSV)
+
+    case base do
+      {:error, err} ->
+        {:error, err}
+
+      base ->
+        1..(count - 1)
+        |> Enum.map(fn i ->
+          div = div(i, 6)
+
+          degree_offset = round(360 / 6)
+          base_offset = i * degree_offset
+          rotation_offset = -360 * div + safe_divide(degree_offset, 2 * div)
+          hue_offset = round(base_offset + rotation_offset)
+
+          hue = rem(base.h + hue_offset, 360)
+          Chameleon.HSV.new(hue, base.s, base.v)
+        end)
+        |> then(&format_response(color, &1))
+    end
+  end
+
+  @doc """
+  Returns the requested count of colors, including the provided color, evenly spaced along the color wheel.
 
   ## Examples
 
@@ -216,4 +259,7 @@ defmodule MotleyHue do
         {:error, err}
     end
   end
+
+  defp safe_divide(_, 0), do: 0
+  defp safe_divide(num, dem), do: num / dem
 end
