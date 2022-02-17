@@ -13,6 +13,7 @@ All color conversion is delegated to Chameleon while Mötley Hüe simply handles
 * Tetradic - Four colors that are evenly spaced on the color wheel
 * Even - An arbitrary number of colors that are evenly spaced on the color wheel
 * Contrast - An arbitrary number of colors that are distributed around the color wheel for maximum sequential differentiation
+* Gradient - A color gradient of arbitrary size
 
 ## Installation
 
@@ -53,6 +54,9 @@ iex> MotleyHue.even("FF0000", 5)
 
 iex> MotleyHue.contrast("FF0000", 7)
 ["FF0000", "FFFF00", "00FF00", "00FFFF", "0000FF", "FF00FF", "FF8000"]
+
+iex> MotleyHue.gradient("FF0000", "008080", 5)
+["FF0000", "DF00A7", "6000BF", "00289F", "008080"]
 ```
 
 If you're using Chameleon directly, then Mötley Hüe will return your color combinations with the same struct definition it was given.

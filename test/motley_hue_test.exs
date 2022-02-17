@@ -49,6 +49,16 @@ defmodule MotleyHueTest do
     assert even_combination |> Enum.map(& &1.v) == [100, 100, 100, 100, 100]
   end
 
+  test "gradient" do
+    hsv1 = Chameleon.HSV.new(0, 100, 100)
+    hsv2 = Chameleon.HSV.new(180, 100, 50)
+    gradient_combination = MotleyHue.gradient(hsv1, hsv2, 5)
+
+    assert gradient_combination |> Enum.map(& &1.h) == [0, 315, 270, 225, 180]
+    assert gradient_combination |> Enum.map(& &1.s) == [100, 100, 100, 100, 100]
+    assert gradient_combination |> Enum.map(& &1.v) == [100, 87.5, 75.0, 62.5, 50]
+  end
+
   test "monochromatic" do
     hsv = Chameleon.HSV.new(0, 100, 100)
     monochromatic_combination = MotleyHue.monochromatic(hsv, 4)

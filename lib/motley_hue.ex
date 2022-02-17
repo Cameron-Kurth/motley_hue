@@ -166,6 +166,56 @@ defmodule MotleyHue do
   end
 
   @doc """
+  Returns a gradient of the size of the provided count bookended by the two provided colors.
+
+  ## Examples
+
+      iex> MotleyHue.gradient("FF0000", "008080", 5)
+      ["FF0000", "DF00A7", "6000BF", "00289F", "008080"]
+
+  """
+  @spec gradient(binary | map, binary | map, integer) :: list | {:error, binary}
+  def gradient(_color1, _color2, count) when count < 3,
+    do: {:error, "Count must be a positive integer greater than or equal to 3"}
+
+  def gradient(color1, color2, count) when is_integer(count) do
+    base1 = Chameleon.convert(color1, Chameleon.HSV)
+    base2 = Chameleon.convert(color2, Chameleon.HSV)
+
+    case {base1, base2} do
+      {{:error, err}, _} ->
+        {:error, err}
+
+      {_, {:error, err}} ->
+        {:error, err}
+
+      {base1, base2} ->
+        hue_diff = base1.h - base2.h
+        saturation_diff = base1.s - base2.s
+        value_diff = base1.v - base2.v
+
+        hue_degree_offset = hue_diff |> safe_divide(count - 1)
+        saturation_percent_offset = saturation_diff |> safe_divide(count - 1)
+        value_percent_offset = value_diff |> safe_divide(count - 1)
+
+        1..(count - 2)
+        |> Enum.map(fn i ->
+          hue_offset = i * hue_degree_offset
+          hue = calculate_degree(base1.h + hue_offset)
+
+          saturation_offset = i * saturation_percent_offset
+          saturation = base1.s - saturation_offset
+
+          value_offset = i * value_percent_offset
+          value = base1.v - value_offset
+
+          Chameleon.HSV.new(hue, saturation, value)
+        end)
+        |> then(&format_response(color1, color2, &1))
+    end
+  end
+
+  @doc """
   Returns the provided color and its monochromatic color spectrum towards black.
   The number of results is configurable with each color equally spaced from the previous value.
 
@@ -251,6 +301,45 @@ defmodule MotleyHue do
 
       {:ok, derived_color} ->
         format_response(derived_color, matches)
+
+      {:error, err} ->
+        {:error, err}
+    end
+  end
+
+  defp format_response(color1, color2, matches) when is_struct(color1) do
+    [color1]
+    |> Kernel.++(matches)
+    |> Kernel.++([color2])
+    |> Enum.map(&Chameleon.convert(&1, color1.__struct__))
+  end
+
+  defp format_response(color1, color2, matches) when is_binary(color2) do
+    case Chameleon.Util.derive_input_struct(color2) do
+      {:ok, %Chameleon.Hex{} = derived_color2} ->
+        format_response(color1, derived_color2, matches)
+
+      {:ok, derived_color2} ->
+        format_response(color1, derived_color2, matches)
+
+      {:error, err} ->
+        {:error, err}
+    end
+  end
+
+  defp format_response(color1, color2, matches) when is_binary(color1) do
+    case Chameleon.Util.derive_input_struct(color1) do
+      {:ok, %Chameleon.Hex{} = derived_color1} ->
+        case color1 do
+          "#" <> _ ->
+            format_response(derived_color1, color2, matches) |> Enum.map(&"##{&1.hex}")
+
+          _ ->
+            format_response(derived_color1, color2, matches) |> Enum.map(& &1.hex)
+        end
+
+      {:ok, derived_color1} ->
+        format_response(derived_color1, color2, matches)
 
       {:error, err} ->
         {:error, err}
